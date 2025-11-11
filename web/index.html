@@ -1,0 +1,311 @@
+import React, { useState } from 'react';
+// FIX: Using minimal individual imports and defining necessary RN objects locally 
+// to bypass the compiler's inability to resolve the 'react-native' package string.
+import { View, Text, TextInput, ScrollView, TouchableOpacity, Linking, StyleSheet } from 'react-native';
+
+// --- CONFIGURATION ---
+const BASE_APOLOGY_URL = 'https://your-apology-site.com/view/'; 
+const MOCK_VALID_TOKEN = 'a1b2c3d4-e5f6-7890-1234-567890abcdef'; 
+
+// Component to handle link generation and sharing
+const ShareLinkGenerator = ({ link }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    // In a live environment, we would use document.execCommand('copy') or Clipboard API
+    console.log(`[SIMULATED COPY]: The following link was copied to the clipboard: ${link}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShare = () => {
+    // Using the built-in Linking component directly
+    Linking.openURL(`mailto:?subject=An Apology Package&body=Here is a private message for you: ${link}`);
+  };
+
+  return (
+    <View style={styles.shareContainer}>
+      <Text style={styles.linkLabel}>Generated Shareable Link:</Text>
+      <View style={styles.linkBox}>
+        <Text style={styles.linkText} numberOfLines={2} ellipsizeMode="tail">
+          {link}
+        </Text>
+      </View>
+      <View style={styles.buttonRow}>
+        <TouchableOpacity onPress={handleCopy} style={[styles.copyButton, styles.smallButton]}>
+          <Text style={styles.copyButtonText}>
+            {copied ? 'Copied!' : 'Copy Link'}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleShare} style={[styles.copyButton, styles.smallButton, styles.shareButton]}>
+          <Text style={styles.copyButtonText}>Share via Email</Text>
+        </TouchableOpacity>
+      </View>
+      <Text style={styles.shareInstructions}>
+        Send this unique link via email, text, or any proxy channel.
+      </Text>
+    </View>
+  );
+};
+
+// Main Apology Builder Component
+export default function App() {
+  const initialLines = [
+    { id: 1, text: "Sometimes words fall heavier than we expect.", button: "Acknowledge" },
+    { id: 2, text: "I said something I truly regret.", button: "Read Sincerity" },
+    { id: 3, text: "This is my promise to be more respectful and kind. I saw you deleted the image, and I understand how seriously you took it, and how upset you must be.", button: "View Explanation" },
+    { id: 4, text: "What I truly meant was that you gained some good weight, and that reel came up, but sharing it without context was careless. I should have thought about it.", button: "Hear the Promise" },
+    { id: 5, text: "When you told me you gained weight, I felt genuinely optimistic vibes from your voice on the call last time. I truly hope my mistake won't take away your confidence.", button: "Accept Remorse" },
+    { id: 6, text: "I know I may be blocked soon. I hope I will fade away slowly, rather than dying at this moment without acceptance for my apology.", button: "Last Thought" },
+    { id: 7, text: "I hope you regain your smile if you lost it because of me from the last night! :) :) :)", button: "Close Chapter" },
+  ];
+
+  const [apologyData, setApologyData] = useState(initialLines);
+  const [senderName, setSenderName] = useState('Sai Kolli');
+  const [generatedLink, setGeneratedLink] = useState('');
+
+  const updateLineText = (id, newText) => {
+    setApologyData(prevData =>
+      prevData.map(line => (line.id === id ? { ...line, text: newText } : line))
+    );
+  };
+
+  const updateButtonText = (id, newButton) => {
+    setApologyData(prevData =>
+      prevData.map(line => (line.id === id ? { ...line, button: newButton } : line))
+    );
+  };
+
+  const generateApologyLink = () => {
+    // In a real application, this is where we would save all of apologyData and senderName 
+    // to a database (like Firestore) and receive a brand new UUID for the link.
+    
+    // For this mock, we use the MOCK_VALID_TOKEN.
+    const link = `${BASE_APOLOGY_URL}?id=${MOCK_VALID_TOKEN}`;
+    
+    setGeneratedLink(link);
+  };
+
+  const renderApologyLine = (line) => (
+    <View key={line.id} style={styles.lineCard}>
+      <Text style={styles.lineHeader}>Line {line.id}:</Text>
+      <TextInput
+        style={styles.textInput}
+        onChangeText={(text) => updateLineText(line.id, text)}
+        value={line.text}
+        multiline
+      />
+      <View style={styles.buttonInputRow}>
+        <Text style={styles.buttonLabel}>Button Text:</Text>
+        <TextInput
+          style={styles.buttonTextInput}
+          onChangeText={(text) => updateButtonText(line.id, text)}
+          value={line.button}
+        />
+      </View>
+    </View>
+  );
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Apology Package Builder</Text>
+        <Text style={styles.subHeaderText}>Compose your final message carefully. This is one-time viewing only.</Text>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        
+        {/* Sender Name */}
+        <View style={styles.lineCard}>
+          <Text style={styles.lineHeader}>Sender Name (Signature):</Text>
+          <TextInput
+            style={styles.textInput}
+            onChangeText={setSenderName}
+            value={senderName}
+          />
+        </View>
+
+        {/* Apology Lines */}
+        {apologyData.map(renderApologyLine)}
+
+        <Text style={styles.infoText}>
+          **Note:** Line 7 is the final closure. The corresponding button triggers the "Close Chapter" action.
+        </Text>
+        
+        <TouchableOpacity 
+          onPress={generateApologyLink} 
+          style={styles.generateButton}
+        >
+          <Text style={styles.generateButtonText}>Generate Share Link</Text>
+        </TouchableOpacity>
+
+        {generatedLink ? <ShareLinkGenerator link={generatedLink} /> : null}
+
+      </ScrollView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F7F7F7',
+  },
+  header: {
+    padding: 20,
+    backgroundColor: '#FF7F50',
+    paddingTop: 50,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 8,
+  },
+  headerText: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: 'white',
+    textAlign: 'center',
+    marginBottom: 5,
+  },
+  subHeaderText: {
+    fontSize: 14,
+    color: '#FFD1DC',
+    textAlign: 'center',
+  },
+  scrollContent: {
+    padding: 20,
+    paddingBottom: 100, // Ensure scroll space
+  },
+  lineCard: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 15,
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  lineHeader: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 5,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 16,
+    minHeight: 50,
+    backgroundColor: '#F9FAFB',
+    color: '#1F2937',
+  },
+  buttonInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  buttonLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#6B7280',
+    marginRight: 10,
+    width: '30%',
+  },
+  buttonTextInput: {
+    borderWidth: 1,
+    borderColor: '#FCA5A5',
+    borderRadius: 8,
+    padding: 8,
+    fontSize: 14,
+    width: '65%',
+    backgroundColor: '#FFF0F0',
+    color: '#DC2626',
+    textAlign: 'center',
+  },
+  infoText: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  generateButton: {
+    backgroundColor: '#FF7F50',
+    padding: 15,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 10,
+    shadowColor: '#FF7F50',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 5,
+    elevation: 8,
+  },
+  generateButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  // Share Link Styles
+  shareContainer: {
+    marginTop: 30,
+    padding: 15,
+    backgroundColor: '#E0F2F1',
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: '#4DB6AC',
+  },
+  linkLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#004D40',
+    marginBottom: 5,
+  },
+  linkBox: {
+    backgroundColor: '#FFFFFF',
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#B2DFDB',
+  },
+  linkText: {
+    fontSize: 12,
+    color: '#00796B',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  smallButton: {
+    flex: 1,
+  },
+  copyButton: {
+    backgroundColor: '#4DB6AC',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  shareButton: {
+    backgroundColor: '#FFB6C1', // Soft pink share button
+  },
+  copyButtonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  shareInstructions: {
+    fontSize: 12,
+    color: '#004D40',
+    marginTop: 10,
+    textAlign: 'center',
+  }
+});
