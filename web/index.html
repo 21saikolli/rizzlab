@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>An Apology Package</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* BASE STYLES */
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: all 0.8s ease-in-out;
+        }
+
+        /* --- THEMES DEFINITIONS --- */
+
+        /* 1. K-DRAMA SUNSET (Default, Warm) */
+        .kdrama-bg {
+            background: linear-gradient(135deg, #FFD1DC 0%, #FFB6C1 50%, #FF7F50 100%);
+            color: #fff; /* White text for contrast */
+        }
+        .kdrama-bg .bg-visual {
+            background-image: url('https://placehold.co/1200x800/FFB6C1/FFFFFF?text=Blurred+Scenery');
+        }
+        .kdrama-bg #apology-container {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        .kdrama-bg #next-button {
+            background-color: white;
+            color: #FF7F50; 
+        }
+
+        /* 2. RAINY DAY (Somber, High Contrast) */
+        .rainy-day-bg {
+            background: linear-gradient(135deg, #4A5568 0%, #2D3748 100%);
+            color: #D1D5DB; /* Light gray text */
+        }
+        .rainy-day-bg .bg-visual {
+            background-image: url('https://placehold.co/1200x800/2D3748/6B7280?text=Rainy+Filter');
+            filter: blur(4px) opacity(0.9);
+        }
+        .rainy-day-bg #apology-container {
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+        .rainy-day-bg #next-button {
+            background-color: #6B7280;
+            color: #1F2937;
+        }
+
+        /* 3. MINIMALIST FORMAL (Direct, Low Emotion) */
+        .formal-bg {
+            background-color: #FFFFFF;
+            color: #1F2937; /* Dark text */
+        }
+        .formal-bg #apology-container {
+            background-color: rgba(0, 0, 0, 0.05);
+            border: 1px solid #E5E7EB;
+            box-shadow: none;
+        }
+        .formal-bg #next-button {
+            background-color: #1F2937;
+            color: #FFFFFF;
+        }
+
+        /* GENERAL UI STYLES */
+        .bg-visual {
+            background-size: cover;
+            background-position: center;
+            filter: blur(5px) opacity(0.8);
+            position: absolute;
+            width: 110%;
+            height: 110%;
+            top: -5%;
+            left: -5%;
+            z-index: 0;
+            transition: all 0.8s ease-in-out;
+        }
+        .text-content {
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 1.2s ease-in-out;
+            min-height: 18rem; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .fade-in {
+            opacity: 1;
+        }
+        .apology-text {
+            font-weight: 100; 
+            line-height: 2.25rem;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        }
+        .disabled-button {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .error-message {
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+        }
+    </style>
+</head>
+<body class="kdrama-bg min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Blurred Background Layer (Simulating the K-Drama Visual) -->
+    <div class="bg-visual"></div>
+
+    <!-- Main Content Card / Error Message -->
+    <div id="apology-container" class="relative w-full max-w-lg mx-auto bg-white/30 backdrop-blur-md rounded-3xl shadow-2xl p-6 md:p-10 flex flex-col items-center justify-center">
+        
+        <!-- Theme Selector (Initial View) -->
+        <div id="theme-selector" class="w-full text-center text-white h-full p-6 transition-opacity duration-500">
+            <h2 class="text-3xl font-bold mb-4">Choose Your Viewing Theme</h2>
+            <p class="text-lg mb-8 text-white/80">Select a theme below to control the mood and process the message at your pace.</p>
+
+            <div class="flex flex-col space-y-4">
+                <button onclick="selectTheme('kdrama-bg')" class="theme-btn bg-pink-300/80 text-white py-3 rounded-xl font-semibold shadow-md hover:bg-pink-400 transition-all">K-Drama Sunset (Hopeful)</button>
+                <button onclick="selectTheme('rainy-day-bg')" class="theme-btn bg-gray-600/80 text-white py-3 rounded-xl font-semibold shadow-md hover:bg-gray-700 transition-all">Rainy Day (Somber)</button>
+                <button onclick="selectTheme('formal-bg')" class="theme-btn bg-white/90 text-gray-800 py-3 rounded-xl font-semibold shadow-md hover:bg-gray-200 transition-all">Minimalist Formal (Direct)</button>
+            </div>
+            
+            <p id="theme-error" class="text-xs text-red-300 mt-4 hidden">Please select a theme to continue.</p>
+        </div>
+        
+        <!-- Apology Text Display (Hidden until theme is selected) -->
+        <div id="text-content" class="text-content w-full text-center text-white hidden">
+            <p id="current-line" class="apology-text text-xl md:text-2xl italic"></p>
+        </div>
+
+        <!-- Error Message Display (Hidden until link fails) -->
+        <div id="error-content" class="error-message w-full text-center text-white h-48 hidden">
+            <!-- Content will be inserted by JS -->
+        </div>
+
+        <!-- Button Area -->
+        <button id="next-button" 
+                class="mt-8 px-8 py-3 rounded-full text-lg font-semibold 
+                       bg-white text-pink-500 shadow-xl hover:shadow-2xl 
+                       transition-all transform focus:outline-none focus:ring-4 focus:ring-pink-300/50 disabled-button hidden">
+            Acknowledge
+        </button>
+        
+        <!-- Read Receipt/Sender Signature -->
+        <p id="sender-info" class="mt-8 text-sm text-white/70 hidden">Apology from Sai Kolli</p>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const MIN_READ_TIME_MS = 4000; 
+        const URL_TOKEN_PARAM = 'id';
+        const URL_DATA_PARAM = 'data';
+        const MOCK_VALID_TOKEN = 'a1b2c3d4-e5f6-7890-1234-567890abcdef';
+        
+        // --- FALLBACK APOLOGY DATA ---
+        // This is used ONLY if the 'data' param is missing from the URL
+        const FALLBACK_DATA = {
+            senderName: "Sai Kolli",
+            lines: [
+                { text: "Sometimes words fall heavier than we expect.", button: "Acknowledge" },
+                { text: "I said something I truly regret.", button: "Read Sincerity" },
+                { text: "This is my promise to be more respectful...", button: "View Explanation" },
+                { text: "What I truly meant was that you gained some good weight...", button: "Hear the Promise" },
+                { text: "When you told me you gained weight, I felt genuinely optimistic...", button: "Accept Remorse" },
+                { text: "I know I may be blocked soon. I hope I will fade away slowly...", button: "Last Thought" },
+                { text: "I hope you regain your smile if you lost it... :)", button: "Close Chapter" }
+            ]
+        };
+
+        let currentApologyData = FALLBACK_DATA; // Default to fallback
+        let currentStep = 0;
+        let isButtonEnabled = false;
+
+        // --- DOM ELEMENT REFERENCES ---
+        let body, currentLineElement, nextButton, textContentWrapper, errorContentWrapper, themeSelector, senderInfo, apologyContainer;
+
+        // Function to assign DOM elements AFTER content loads
+        function assignDOMElements() {
+            body = document.body;
+            currentLineElement = document.getElementById('current-line');
+            nextButton = document.getElementById('next-button');
+            textContentWrapper = document.getElementById('text-content');
+            errorContentWrapper = document.getElementById('error-content');
+            themeSelector = document.getElementById('theme-selector');
+            senderInfo = document.getElementById('sender-info');
+            apologyContainer = document.getElementById('apology-container');
+        }
+
+        // --- THEME MANAGEMENT ---
+
+        function applyTheme(themeClass) {
+            body.classList.remove('kdrama-bg', 'rainy-day-bg', 'formal-bg');
+            body.classList.add(themeClass);
+
+            const isFormal = themeClass === 'formal-bg';
+            
+            textContentWrapper.classList.toggle('text-white', !isFormal);
+            textContentWrapper.classList.toggle('text-gray-900', isFormal);
+            senderInfo.classList.toggle('text-white/70', !isFormal);
+            senderInfo.classList.toggle('text-gray-600', isFormal);
+            currentLineElement.style.textShadow = isFormal ? 'none' : '1px 1px 3px rgba(0,0,0,0.2)';
+            
+            nextButton.classList.remove('bg-white', 'text-pink-500', 'bg-gray-600', 'text-gray-800', 'bg-white/90', 'text-gray-800', 'bg-black', 'text-white');
+            if (themeClass === 'kdrama-bg') {
+                nextButton.classList.add('bg-white', 'text-pink-500', 'focus:ring-pink-300/50');
+            } else if (themeClass === 'rainy-day-bg') {
+                nextButton.classList.add('bg-gray-600', 'text-gray-100', 'focus:ring-gray-400/50');
+            } else if (themeClass === 'formal-bg') {
+                nextButton.classList.add('bg-gray-900', 'text-white', 'focus:ring-gray-400/50');
+            }
+        }
+
+        window.selectTheme = function(themeClass) {
+            applyTheme(themeClass);
+            
+            themeSelector.classList.add('hidden');
+            nextButton.classList.remove('hidden');
+            senderInfo.classList.remove('hidden');
+            textContentWrapper.classList.remove('hidden');
+
+            startApology();
+        }
+
+        // --- UTILITY FUNCTIONS ---
+
+        function disableButton() {
+            isButtonEnabled = false;
+            nextButton.classList.add('disabled-button');
+            nextButton.classList.remove('hover:scale-[1.03]');
+            nextButton.style.cursor = 'wait';
+        }
+
+        function enableButton() {
+            isButtonEnabled = true;
+            nextButton.classList.remove('disabled-button');
+            nextButton.classList.add('hover:scale-[1.03]');
+            nextButton.style.cursor = 'pointer';
+        }
+
+        function displayError(title, message) {
+            // Ensure elements are assigned before trying to modify them
+            if (!themeSelector) assignDOMElements(); 
+            
+            themeSelector.classList.add('hidden');
+            nextButton.classList.add('hidden');
+            senderInfo.classList.add('hidden'); // Hide sender info on error
+            errorContentWrapper.classList.remove('hidden');
+            errorContentWrapper.innerHTML = `
+                <div class="text-center">
+                    <p class="text-2xl md:text-3xl font-bold mb-2">${title}</p>
+                    <p class="text-white/80 text-md md:text-lg">${message}</p>
+                </div>
+            `;
+        }
+        
+        // --- CORE LOGIC ---
+
+        function updateContent(index) {
+            disableButton(); 
+            const line = currentApologyData.lines[index];
+            
+            textContentWrapper.classList.remove('fade-in');
+
+            setTimeout(() => {
+                currentLineElement.textContent = line.text;
+                nextButton.textContent = line.button;
+                
+                textContentWrapper.classList.add('fade-in');
+
+                setTimeout(enableButton, MIN_READ_TIME_MS);
+
+                // Check for the *exact* final button text
+                if (index === currentApologyData.lines.length - 1) { 
+                    nextButton.removeEventListener('click', handleNextClick);
+                    nextButton.addEventListener('click', handleCloseChapter);
+                }
+            }, 500); // Short delay for fade-out effect
+        }
+
+        function handleCloseChapter() {
+             const isFormal = body.classList.contains('formal-bg');
+             apologyContainer.innerHTML = `
+                <div class="text-center p-10">
+                    <p class="text-3xl font-bold mb-4 ${isFormal ? 'text-gray-900' : 'text-white'}">Message Sent.</p>
+                    <p class="text-lg ${isFormal ? 'text-gray-600' : 'text-white/80'}">I truly hope this moment brings you peace.</p>
+                    <button onclick="window.close()" class="mt-8 px-6 py-2 rounded-full bg-white text-pink-500 font-semibold shadow-lg transition-all transform hover:scale-[1.03] active:scale-[0.98]">Minimize</button>
+                </div>
+            `;
+        }
+
+        function handleNextClick() {
+            if (!isButtonEnabled) return; 
+            
+            if (currentStep < currentApologyData.lines.length - 1) {
+                currentStep++;
+                updateContent(currentStep);
+            }
+            // Note: The 'else' case (final click) is now handled by the event listener swap in updateContent
+        }
+
+        function startApology() {
+            senderInfo.textContent = `Apology from ${currentApologyData.senderName}`;
+            currentLineElement.textContent = currentApologyData.lines[0].text;
+            nextButton.textContent = currentApologyData.lines[0].button; // Set initial button text
+            textContentWrapper.classList.add('fade-in'); 
+
+            nextButton.addEventListener('click', handleNextClick);
+
+            setTimeout(enableButton, MIN_READ_TIME_MS);
+            
+            // Pre-check if the very first line is also the last line
+            if (currentApologyData.lines.length === 1) {
+                 nextButton.removeEventListener('click', handleNextClick);
+                 nextButton.addEventListener('click', handleCloseChapter);
+            }
+        }
+
+        // --- SECURITY AND INITIALIZATION ---
+        
+        // NEW Day 5 Function: Decodes the URL-safe Base64 string
+        function decodeApologyData(encodedData) {
+            try {
+                // Replace URL-safe characters back to standard Base64
+                let base64 = encodedData.replace(/-/g, '+').replace(/_/g, '/');
+                // Add padding if missing
+                while (base64.length % 4) {
+                    base64 += '=';
+                }
+                const jsonString = atob(base64); // Decode Base64
+                return JSON.parse(jsonString); // Parse JSON
+            } catch (e) {
+                console.error("Failed to decode apology data:", e);
+                return null; // Return null if decoding fails
+            }
+        }
+
+        function checkLinkSecurity() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get(URL_TOKEN_PARAM);
+            const data = urlParams.get(URL_DATA_PARAM);
+
+            // 1. Expiration Check (Simulated)
+            if (!token) {
+                 displayError("Apology Expired.", "This message has passed its viewing window and is no longer available.");
+                 return false;
+            }
+
+            // 2. Single-Use Check (Simulated)
+            if (token !== MOCK_VALID_TOKEN) { 
+                 displayError("Apology Delivered.", "This unique link has already been opened by the intended recipient.");
+                 return false;
+            }
+            
+            // 3. NEW Day 5: Load Dynamic Data
+            if (data) {
+                const decoded = decodeApologyData(data);
+                if (decoded) {
+                    currentApologyData = decoded; // Success! Use custom data.
+                } else {
+                    // Data is corrupt, use fallback
+                    console.warn("Corrupt data in URL, using fallback.");
+                    currentApologyData = FALLBACK_DATA; 
+                }
+            } else {
+                // No data param, use fallback (for testing)
+                console.warn("No data in URL, using fallback.");
+                currentApologyData = FALLBACK_DATA;
+            }
+
+            return true;
+        }
+
+        function initializeApp() {
+            // Run security check *before* trying to find elements
+            if (checkLinkSecurity()) {
+                // If security passes, show the theme selector first.
+                // We must assign elements *after* the check, but *before* showing the selector
+                assignDOMElements();
+                themeSelector.classList.remove('hidden');
+            }
+            // If checkLinkSecurity() fails, it calls displayError() which handles all UI hiding.
+        }
+
+        // Wait for the DOM to be fully loaded before initializing
+        window.addEventListener('DOMContentLoaded', () => {
+            initializeApp();
+        });
+
+    </script>
+</body>
+</html>
