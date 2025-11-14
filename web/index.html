@@ -1,454 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>An Apology Package</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- NEW: Added html2canvas library for saving the memento -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <style>
-        body { font-family: 'Inter', sans-serif; transition: all 0.8s ease-in-out; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RizzLab.io – Coming Soon</title>
 
-        /* --- BUILDER STYLES --- */
-        .input-group { transition: all 0.3s ease; }
-        .input-group:focus-within {
-            transform: scale(1.02);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            z-index: 10;
-        }
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-        /* --- VIEWER THEME STYLES --- */
-        .kdrama-bg { background: linear-gradient(135deg, #FFD1DC 0%, #FFB6C1 50%, #FF7F50 100%); color: #fff; }
-        .kdrama-bg .bg-visual { background-image: url('https://placehold.co/1200x800/FFB6C1/FFFFFF?text=Blurred+Scenery'); }
-        .kdrama-bg .viewer-card { background-color: rgba(255, 255, 255, 0.3); }
-        .kdrama-bg .viewer-button { background-color: white; color: #FF7F50; }
-        .kdrama-bg .memento-card { background-color: rgba(255, 255, 255, 0.9); color: #333; } /* Memento Card Style */
-        .kdrama-bg .memento-button { background-color: #FF7F50; color: white; }
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;700&display=swap" rel="stylesheet">
 
-        .rainy-day-bg { background: linear-gradient(135deg, #4A5568 0%, #2D3748 100%); color: #D1D5DB; }
-        .rainy-day-bg .bg-visual { background-image: url('https://placehold.co/1200x800/2D3748/6B7280?text=Rainy+Filter'); filter: blur(4px) opacity(0.9); }
-        .rainy-day-bg .viewer-card { background-color: rgba(0, 0, 0, 0.4); }
-        .rainy-day-bg .viewer-button { background-color: #6B7280; color: #1F2937; }
-        .rainy-day-bg .memento-card { background-color: rgba(45, 55, 72, 0.9); color: #FFF; } /* Memento Card Style */
-        .rainy-day-bg .memento-button { background-color: #6B7280; color: white; }
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+      background: radial-gradient(circle at 20% 20%, #0a0f1f, #04070d);
+      color: white;
+      overflow: hidden;
+    }
 
-        .formal-bg { background-color: #FFFFFF; color: #1F2937; }
-        .formal-bg .viewer-card { background-color: rgba(0, 0, 0, 0.05); border: 1px solid #E5E7EB; box-shadow: none; }
-        .formal-bg .viewer-button { background-color: #1F2937; color: #FFFFFF; }
-        .formal-bg .memento-card { background-color: #FFF; color: #1F2937; border: 1px solid #E5E7EB; } /* Memento Card Style */
-        .formal-bg .memento-button { background-color: #1F2937; color: white; }
+    /* Floating particles */
+    .particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      animation: float 8s infinite ease-in-out;
+    }
 
-        .bg-visual { background-size: cover; background-position: center; filter: blur(5px) opacity(0.8); position: absolute; width: 110%; height: 110%; top: -5%; left: -5%; z-index: 0; transition: all 0.8s ease-in-out; }
-        .text-content { z-index: 10; opacity: 0; transition: opacity 1.2s ease-in-out; min-height: 18rem; display: flex; align-items: center; justify-content: center; }
-        .fade-in { opacity: 1; }
-        .apology-text { font-weight: 100; line-height: 2.25rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.2); }
-        .disabled-button { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
-        .error-message { z-index: 10; display: flex; align-items: center; justify-content: center; text-shadow: 1px 1px 3px rgba(0,0,0,0.4); }
-    </style>
+    @keyframes float {
+      0% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-40px) scale(1.5); }
+      100% { transform: translateY(0px) scale(1); }
+    }
+
+    /* Text reveal animation */
+    .fade-in {
+      opacity: 0;
+      animation: fadeIn 2s ease-in-out forwards;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+  </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
 
-    <!-- 
-      MODE 1: BUILDER 
-      This is shown by default if no URL params are present.
-    -->
-    <div id="builder-mode" class="w-full max-w-3xl bg-white rounded-2xl shadow-xl p-8 md:p-10">
-        <h1 class="text-3xl font-bold text-gray-800 text-center mb-2">Apology Package Builder</h1>
-        <p class="text-center text-gray-500 mb-8">Customize your message, generate a link, and send it with care.</p>
+<body class="flex items-center justify-center h-screen relative">
 
-        <div class="space-y-6 max-h-[60vh] overflow-y-auto pr-4">
-            <div class="input-group bg-white rounded-lg border border-gray-200 p-4">
-                <label for="senderName" class="block text-sm font-semibold text-pink-600 mb-2">Sender's Name</label>
-                <input type="text" id="senderName" value="Sai Kolli" class="w-full text-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-400">
-            </div>
-            <div id="lines-container" class="space-y-5">
-                <!-- Builder lines will be injected here by JS -->
-            </div>
-        </div>
-
-        <div class="mt-8 border-t border-gray-200 pt-6">
-            <button id="generate-btn" class="w-full bg-pink-600 text-white py-4 rounded-lg text-lg font-semibold hover:bg-pink-700 transition-all shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-pink-300">
-                Generate Shareable Link
-            </button>
-            <div id="link-output-container" class="mt-6 hidden">
-                <label for="shareable-link" class="block text-sm font-semibold text-gray-700 mb-2">Your Unique, One-Time Link:</label>
-                <textarea id="shareable-link" rows="3" class="w-full p-3 border border-gray-300 rounded-md bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400" readonly></textarea>
-                <p class="text-xs text-gray-500 mt-2">This link contains your custom data and the security token. Send it to your recipient.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- 
-      MODE 2: VIEWER 
-      This is hidden by default and only shown if URL params are correct.
-    -->
-    <div id="viewer-mode" class="hidden w-full h-full">
-        <!-- Blurred Background Layer -->
-        <div class="bg-visual"></div>
-
-        <!-- Main Content Card / Error Message -->
-        <div id="apology-container" class="viewer-card relative w-full max-w-lg mx-auto bg-white/30 backdrop-blur-md rounded-3xl shadow-2xl p-6 md:p-10 flex flex-col items-center justify-center">
-            
-            <!-- Theme Selector -->
-            <div id="theme-selector" class="w-full text-center text-white h-full p-6 transition-opacity duration-500">
-                <h2 class="text-3xl font-bold mb-4">Choose Your Viewing Theme</h2>
-                <p class="text-lg mb-8 text-white/80">Select a theme below to control the mood and process the message at your pace.</p>
-                <div class="flex flex-col space-y-4">
-                    <button onclick="selectTheme('kdrama-bg')" class="theme-btn bg-pink-300/80 text-white py-3 rounded-xl font-semibold shadow-md hover:bg-pink-400 transition-all">K-Drama Sunset (Hopeful)</button>
-                    <button onclick="selectTheme('rainy-day-bg')" class="theme-btn bg-gray-600/80 text-white py-3 rounded-xl font-semibold shadow-md hover:bg-gray-700 transition-all">Rainy Day (Somber)</button>
-                    <button onclick="selectTheme('formal-bg')" class="theme-btn bg-white/90 text-gray-800 py-3 rounded-xl font-semibold shadow-md hover:bg-gray-200 transition-all">Minimalist Formal (Direct)</button>
-                </div>
-            </div>
-            
-            <!-- Apology Text Display -->
-            <div id="text-content" class="text-content w-full text-center text-white hidden">
-                <p id="current-line" class="apology-text text-xl md:text-2xl italic"></p>
-            </div>
-
-            <!-- Error Message Display -->
-            <div id="error-content" class="error-message w-full text-center text-white h-48 hidden">
-                <!-- Content will be inserted by JS -->
-            </div>
-
-            <!-- Button Area -->
-            <button id="next-button" 
-                    class="viewer-button mt-8 px-8 py-3 rounded-full text-lg font-semibold 
-                           bg-white text-pink-500 shadow-xl hover:shadow-2xl 
-                           transition-all transform focus:outline-none focus:ring-4 focus:ring-pink-300/50 disabled-button hidden">
-                Acknowledge
-            </button>
-            
-            <!-- Sender Signature -->
-            <p id="sender-info" class="mt-8 text-sm text-white/70 hidden">Apology from Sai Kolli</p>
-        </div>
-    </div>
-
-
-    <script>
-        // --- CONFIGURATION ---
-        const MIN_READ_TIME_MS = 4000; 
-        const URL_TOKEN_PARAM = 'id';
-        const URL_DATA_PARAM = 'data';
-        const MOCK_VALID_TOKEN = 'a1b2c3d4-e5f6-7890-1234-567890abcdef';
-        const BASE_RECIPIENT_URL = 'https://ashy-ocean-066f2850f.3.azurestaticapps.net/'; 
-
-        // --- FALLBACK/INITIAL DATA ---
-        const INITIAL_DATA = {
-            senderName: "Sai Kolli",
-            lines: [
-                { id: 1, text: "Sometimes words fall heavier than we expect.", button: "Acknowledge" },
-                { id: 2, text: "I said something I truly regret.", button: "Read Sincerity" },
-                { id: 3, text: "This is my promise to be more respectful...", button: "View Explanation" },
-                { id: 4, text: "What I truly meant was that you gained some good weight...", button: "Hear the Promise" },
-                { id: 5, text: "When you told me you gained weight, I felt genuinely optimistic...", button: "Accept Remorse" },
-                { id: 6, text: "I know I may be blocked soon. I hope I will fade away slowly...", button: "Last Thought" },
-                { id: 7, text: "I hope you regain your smile if you lost it... :)", button: "Close Chapter" }
-            ]
-        };
-
-        let currentApologyData = INITIAL_DATA; 
-        let currentStep = 0;
-        let isButtonEnabled = false;
-
-        // --- DOM REFERENCES ---
-        let body, apologyContainer, nextButton, textContentWrapper, errorContentWrapper, themeSelector, senderInfo, currentLineElement;
-        let builderMode, viewerMode;
-
-        // --- GLOBAL INITIALIZATION ---
-        window.addEventListener('DOMContentLoaded', () => {
-            // Assign ALL elements first
-            body = document.body;
-            builderMode = document.getElementById('builder-mode');
-            viewerMode = document.getElementById('viewer-mode');
-            apologyContainer = document.getElementById('apology-container');
-            nextButton = document.getElementById('next-button');
-            textContentWrapper = document.getElementById('text-content');
-            errorContentWrapper = document.getElementById('error-content');
-            themeSelector = document.getElementById('theme-selector');
-            senderInfo = document.getElementById('sender-info');
-            currentLineElement = document.getElementById('current-line');
-
-            // --- ROUTING LOGIC ---
-            const urlParams = new URLSearchParams(window.location.search);
-            const token = urlParams.get(URL_TOKEN_PARAM);
-            const data = urlParams.get(URL_DATA_PARAM);
-
-            if (token || data) {
-                // If *any* params exist, assume VIEWER mode
-                initializeViewerMode(token, data);
-            } else {
-                // If NO params exist, assume BUILDER mode
-                initializeBuilderMode();
-            }
-        });
-
-        // =================================================================
-        // MODE 1: BUILDER LOGIC
-        // =================================================================
-        function initializeBuilderMode() {
-            builderMode.classList.remove('hidden');
-            viewerMode.classList.add('hidden');
-            body.classList.remove('kdrama-bg', 'rainy-day-bg', 'formal-bg'); // Reset body style
-            body.classList.add('bg-gray-100');
-
-            const linesContainer = document.getElementById('lines-container');
-            const generateBtn = document.getElementById('generate-btn');
-            const linkOutputContainer = document.getElementById('link-output-container');
-            const shareableLink = document.getElementById('shareable-link');
-
-            if (linesContainer && generateBtn) {
-                renderBuilderInputs(linesContainer);
-                generateBtn.addEventListener('click', () => {
-                    generateShareableLink(linkOutputContainer, shareableLink);
-                });
-            } else {
-                console.error("Builder elements not found!");
-            }
-        }
-
-        function renderBuilderInputs(linesContainer) {
-            linesContainer.innerHTML = ''; // Clear container
-            INITIAL_DATA.lines.forEach(line => {
-                linesContainer.innerHTML += `
-                    <div class="input-group bg-white rounded-lg border border-gray-200 p-4 relative">
-                        <label for="line-${line.id}" class="block text-xs font-semibold text-gray-500 mb-1">Line ${line.id} - Text</label>
-                        <textarea id="line-${line.id}" rows="2" class="line-text w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-300">${line.text}</textarea>
-                        <label for="button-${line.id}" class="block text-xs font-semibold text-gray-500 mt-3 mb-1">Line ${line.id} - Button Label</label>
-                        <input type="text" id="button-${line.id}" value="${line.button}" class="button-text w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-300">
-                    </div>
-                `;
-            });
-        }
-
-        function encodeApologyData(data) {
-            const jsonString = JSON.stringify(data);
-            return btoa(jsonString).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-        }
-
-        function generateShareableLink(linkOutputContainer, shareableLink) {
-            const customData = {
-                senderName: document.getElementById('senderName').value,
-                lines: []
-            };
-
-            const lineTexts = document.querySelectorAll('.line-text');
-            const buttonTexts = document.querySelectorAll('.button-text');
-
-            for (let i = 0; i < lineTexts.length; i++) {
-                customData.lines.push({
-                    text: lineTexts[i].value,
-                    button: buttonTexts[i].value
-                });
-            }
-
-            const encodedData = encodeApologyData(customData);
-            const finalURL = `${BASE_RECIPIENT_URL}?id=${MOCK_VALID_TOKEN}&data=${encodedData}`;
-
-            shareableLink.value = finalURL;
-            linkOutputContainer.classList.remove('hidden');
-        }
-
-
-        // =================================================================
-        // MODE 2: VIEWER LOGIC
-        // =================================================================
-        function initializeViewerMode(token, data) {
-            builderMode.classList.add('hidden');
-            viewerMode.classList.remove('hidden');
-            body.classList.remove('bg-gray-100'); // Use default theme
-            body.classList.add('kdrama-bg'); // Default theme
-
-            if (checkLinkSecurity(token, data)) {
-                themeSelector.classList.remove('hidden');
-            } else {
-                // Security check failed, error is already displayed
-                themeSelector.classList.add('hidden');
-            }
-        }
-
-        function applyTheme(themeClass) {
-            body.classList.remove('kdrama-bg', 'rainy-day-bg', 'formal-bg');
-            body.classList.add(themeClass);
-            const isFormal = themeClass === 'formal-bg';
-            
-            textContentWrapper.classList.toggle('text-white', !isFormal);
-            textContentWrapper.classList.toggle('text-gray-900', isFormal);
-            senderInfo.classList.toggle('text-white/70', !isFormal);
-            senderInfo.classList.toggle('text-gray-600', isFormal);
-            currentLineElement.style.textShadow = isFormal ? 'none' : '1px 1px 3px rgba(0,0,0,0.2)';
-            
-            nextButton.classList.remove('bg-white', 'text-pink-500', 'bg-gray-600', 'text-gray-800', 'bg-white/90', 'text-gray-800', 'bg-black', 'text-white');
-            if (themeClass === 'kdrama-bg') {
-                nextButton.classList.add('bg-white', 'text-pink-500', 'focus:ring-pink-300/50');
-            } else if (themeClass === 'rainy-day-bg') {
-                nextButton.classList.add('bg-gray-600', 'text-gray-100', 'focus:ring-gray-400/50');
-            } else if (themeClass === 'formal-bg') {
-                nextButton.classList.add('bg-gray-900', 'text-white', 'focus:ring-gray-400/50');
-            }
-        }
-
-        window.selectTheme = function(themeClass) {
-            applyTheme(themeClass);
-            themeSelector.classList.add('hidden');
-            nextButton.classList.remove('hidden');
-            senderInfo.classList.remove('hidden');
-            textContentWrapper.classList.remove('hidden');
-            startApology();
-        }
-
-        function disableButton() {
-            isButtonEnabled = false;
-            nextButton.classList.add('disabled-button');
-            nextButton.classList.remove('hover:scale-[1.03]');
-            nextButton.style.cursor = 'wait';
-        }
-
-        function enableButton() {
-            isButtonEnabled = true;
-            nextButton.classList.remove('disabled-button');
-            nextButton.classList.add('hover:scale-[1.03]');
-            nextButton.style.cursor = 'pointer';
-        }
-
-        function displayError(title, message) {
-            themeSelector.classList.add('hidden');
-            nextButton.classList.add('hidden');
-            senderInfo.classList.add('hidden');
-            errorContentWrapper.classList.remove('hidden');
-            errorContentWrapper.innerHTML = `
-                <div class="text-center">
-                    <p class="text-2xl md:text-3xl font-bold mb-2">${title}</p>
-                    <p class="text-white/80 text-md md:text-lg">${message}</p>
-                </div>
-            `;
-        }
-        
-        function updateContent(index) {
-            disableButton(); 
-            const line = currentApologyData.lines[index];
-            textContentWrapper.classList.remove('fade-in');
-
-            setTimeout(() => {
-                currentLineElement.textContent = line.text;
-                nextButton.textContent = line.button;
-                textContentWrapper.classList.add('fade-in');
-                setTimeout(enableButton, MIN_READ_TIME_MS);
-
-                if (index === currentApologyData.lines.length - 1) { 
-                    nextButton.removeEventListener('click', handleNextClick);
-                    nextButton.addEventListener('click', handleCloseChapter);
-                }
-            }, 500);
-        }
-
-        // --- NEW MEMENTO FEATURE (DAY 6) ---
-        function handleCloseChapter() {
-             const isFormal = body.classList.contains('formal-bg');
-             const finalLine = currentApologyData.lines[currentApologyData.lines.length - 1];
-             
-             // Create the HTML for the final "memento" card
-             apologyContainer.innerHTML = `
-                <div id="memento-card" class="memento-card text-center p-10 rounded-xl shadow-lg">
-                    <p class="text-3xl font-bold mb-4 ${isFormal ? 'text-gray-900' : ''}">Message Received</p>
-                    <div class="border-t border-b ${isFormal ? 'border-gray-200' : 'border-white/20'} my-6 py-6">
-                        <p class="text-xl italic ${isFormal ? 'text-gray-700' : ''}">"${finalLine.text}"</p>
-                        <p class="text-md mt-4 ${isFormal ? 'text-gray-500' : 'text-white/80'}">— ${currentApologyData.senderName}</p>
-                    </div>
-                    <p class="text-sm ${isFormal ? 'text-gray-600' : 'text-white/80'}">This link has expired and the apology is complete.</p>
-                    
-                    <div class="flex flex-col sm:flex-row gap-4 mt-8">
-                        <button onclick="downloadMemento()" class="memento-button flex-1 px-6 py-3 rounded-full font-semibold shadow-lg transition-all transform hover:scale-105 active:scale-95">
-                            Download Memento
-                        </button>
-                        <button onclick="window.close()" class="flex-1 px-6 py-3 rounded-full bg-gray-300/30 font-semibold shadow-lg transition-all transform hover:scale-105 active:scale-95 ${isFormal ? 'text-gray-700' : 'text-white'}">
-                            Close
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-        
-        // NEW Function to download the image
-        window.downloadMemento = function() {
-            const mementoCard = document.getElementById('memento-card');
-            
-            // Use html2canvas to render the element
-            html2canvas(mementoCard, {
-                // Use the theme's background color for the canvas
-                backgroundColor: body.classList.contains('formal-bg') ? '#FFFFFF' : (body.classList.contains('rainy-day-bg') ? '#2D3748' : '#FFB6C1'),
-                scale: 2 // Increase scale for higher resolution
-            }).then(canvas => {
-                // Create a link to download the image
-                const link = document.createElement('a');
-                link.download = 'apology-memento.png';
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            });
-        }
-        // --- END MEMENTO FEATURE ---
-
-
-        function handleNextClick() {
-            if (!isButtonEnabled) return; 
-            if (currentStep < currentApologyData.lines.length - 1) {
-                currentStep++;
-                updateContent(currentStep);
-            }
-        }
-
-        function startApology() {
-            senderInfo.textContent = `Apology from ${currentApologyData.senderName}`;
-            currentLineElement.textContent = currentApologyData.lines[0].text;
-            nextButton.textContent = currentApologyData.lines[0].button;
-            textContentWrapper.classList.add('fade-in'); 
-            nextButton.addEventListener('click', handleNextClick);
-            setTimeout(enableButton, MIN_READ_TIME_MS);
-            
-            if (currentApologyData.lines.length === 1) {
-                 nextButton.removeEventListener('click', handleNextClick);
-                 nextButton.addEventListener('click', handleCloseChapter);
-            }
-        }
-        
-        function decodeApologyData(encodedData) {
-            try {
-                let base64 = encodedData.replace(/-/g, '+').replace(/_/g, '/');
-                while (base64.length % 4) { base64 += '='; }
-                const jsonString = atob(base64);
-                return JSON.parse(jsonString);
-            } catch (e) {
-                console.error("Failed to decode apology data:", e);
-                return null;
-            }
-        }
-
-        function checkLinkSecurity(token, data) {
-            if (!token) {
-                 displayError("Apology Expired.", "This message has passed its viewing window and is no longer available.");
-                 return false;
-            }
-            if (token !== MOCK_VALID_TOKEN) { 
-                 displayError("Apology Delivered.", "This unique link has already been opened by the intended recipient.");
-                 return false;
-            }
-            
-            if (data) {
-                const decoded = decodeApologyData(data);
-                if (decoded) {
-                    currentApologyData = decoded;
-                } else {
-                    console.warn("Corrupt data in URL, using fallback.");
-                    currentApologyData = INITIAL_DATA; 
-                }
-            } else {
-                console.warn("No data in URL, using fallback.");
-                currentApologyData = INITIAL_DATA;
-            }
-            return true;
-        }
-
-    </script>
-</body>
-</html>
+  <!-- Particles (10 floating dots) -->
+  <script>
+    for (let i = 0; i < 10; i++) {
+      const p = document.createElement("div");
+      p.classList.add("particle");
+      p.style.left = Math.random() * 100 + "vw";
+      p.style.top = Math.random() * 100 +*
